@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Relatório de Presenças</title>
+
+  <!-- Estilo visual -->
+  <style>
+    body {
+      background: #f4f4f4;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 40px;
+    }
+
+    h2 {
+      color: #a00000;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .exportar {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .exportar button {
+      padding: 10px 20px;
+      background-color: #a00000;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .exportar button:hover {
+      background-color: #8b0000;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    th {
+      background-color: #a00000;
+      color: white;
+    }
+
+    tr:hover {
+      background-color: #f2f2f2;
+    }
+
+    @media (max-width: 768px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      thead {
+        display: none;
+      }
+
+      td {
+        position: relative;
+        padding-left: 50%;
+        text-align: right;
+      }
+
+      td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 15px;
+        font-weight: bold;
+        text-align: left;
+      }
+    }
+  </style>
+
+  <!-- SheetJS correta para exportar Excel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <h2>Relatório de Presença DeMolay</h2>
+
+  <div class="exportar">
+    <button onclick="exportarParaExcel()">Exportar para Excel</button>
+  </div>
+
+  <table id="tabelaPresencas">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>ID</th>
+        <th>Capítulo</th>
+        <th>Tipo</th>
+        <th>Data/Hora</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <script>
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyBQ99PDQt0aVI_s1P5CdQqTgNTGrI3tMJg",
+      authDomain: "demolay-c1b6f.firebaseapp.com",
+      projectId: "demolay-c1b6f",
+      databaseURL: "https://demolay-c1b6f-default-rtdb.firebaseio.com"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const tabela = document.querySelector("#tabelaPresencas tbody");
+
+    // Preenche a tabela
+    db.ref("presencas").on("value", (snapshot) => {
+      tabela.innerHTML = "";
+      snapshot.forEach((childSnapshot) => {
+        const dados = childSnapshot.val();
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td data-label="Nome">${dados.nome}</td>
+          <td data-label="ID">${dados.id}</td>
+          <td data-label="Capítulo">${dados.capitulo}</td>
+          <td data-label="Tipo">${dados.tipo}</td>
+          <td data-label="Data/Hora">${dados.horario}</td>
+        `;
+        tabela.appendChild(row);
+      });
+    });
+
+    // Função para exportar dados para Excel
+    function exportarParaExcel() {
+      const linhas = [["Nome", "ID", "Capítulo", "Tipo", "Data/Hora"]];
+
+      db.ref("presencas").once("value").then((snapshot) => {
+        if (!snapshot.exists()) {
+          alert("Nenhum dado encontrado para exportar.");
+          return;
+        }
+
+        snapshot.forEach((childSnapshot) => {
+          const dados = childSnapshot.val();
+          linhas.push([
+            dados.nome || "",
+            dados.id || "",
+            dados.capitulo || "",
+            dados.tipo || "",
+            dados.horario || ""
+          ]);
+        });
+
+        const worksheet = XLSX.utils.aoa_to_sheet(linhas);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Presenças");
+
+        XLSX.writeFile(workbook, "relatorio-presencas.xlsx");
+      }).catch((error) => {
+        console.error("Erro ao exportar:", error);
+        alert("Erro ao exportar dados. Verifique o console.");
+      });
+    }
+  </script>
+
+</body>
+</html>
