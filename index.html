@@ -1,42 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Registro de Presença DeMolay</title>
   <style>
-    
+    * {
+      box-sizing: border-box;
+    }
+
     html, body {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-body {
-  min-height: 100dvh;
-  height: 100%;
-  background:
-    linear-gradient(135deg, #2b2b2b, #4a0000),
-    url('https://www.toptal.com/designers/subtlepatterns/uploads/stardust.png');
-  background-size: cover;
-  background-attachment: fixed;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-}
-
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #2b2b2b, #4a0000);
+      background-attachment: fixed;
+      background-size: cover;
+    }
 
     form {
-      position: relative;
-      z-index: 1;
       background: rgba(255, 255, 255, 0.15);
       border: 1px solid rgba(255, 255, 255, 0.3);
       backdrop-filter: blur(10px);
-      padding: 30px 40px;
+      padding: 25px 20px;
       border-radius: 12px;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-      width: 90%;
+      width: 100%;
       max-width: 400px;
       text-align: center;
     }
@@ -61,18 +57,17 @@ body {
     .tipo-presenca {
       margin: 15px 0;
       text-align: left;
+      color: white;
     }
 
     .tipo-presenca p {
       margin: 0 0 5px;
       font-weight: bold;
-      color: white;
     }
 
     .tipo-presenca label {
       margin-right: 15px;
-      font-size: 15px;
-      color: white;
+      font-size: 16px;
     }
 
     button {
@@ -83,8 +78,6 @@ body {
       font-size: 16px;
       border-radius: 6px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
-      margin-top: 10px;
       width: 100%;
     }
 
@@ -93,22 +86,18 @@ body {
     }
 
     @media (max-width: 500px) {
-      form {
-        padding: 25px 20px;
-      }
-
       form h2 {
         font-size: 20px;
       }
 
-      input[type="text"] {
+      input[type="text"],
+      button {
         font-size: 15px;
         padding: 12px;
       }
 
-      button {
-        font-size: 15px;
-        padding: 12px;
+      .tipo-presenca label {
+        font-size: 14px;
       }
     }
   </style>
@@ -116,7 +105,6 @@ body {
 <body>
   <form id="formPresenca">
     <h2>Registro de Presença DeMolay</h2>
-
     <input type="text" placeholder="Nome" id="nome" required><br>
     <input type="text" placeholder="ID" id="id" required><br>
     <input type="text" placeholder="Capítulo" id="capitulo" required><br>
@@ -130,7 +118,7 @@ body {
     <button type="submit">Confirmar Presença</button>
   </form>
 
-  <!-- Firebase SDKs -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -152,17 +140,9 @@ body {
       const id = document.getElementById("id").value;
       const capitulo = document.getElementById("capitulo").value;
       const tipo = document.querySelector('input[name="tipo"]:checked').value;
+      const horario = new Date().toLocaleString("pt-BR");
 
-      const agora = new Date();
-      const horario = agora.toLocaleString("pt-BR");
-
-      db.ref("presencas").push({
-        nome,
-        id,
-        capitulo,
-        tipo,
-        horario
-      });
+      db.ref("presencas").push({ nome, id, capitulo, tipo, horario });
 
       alert("Presença confirmada!");
       this.reset();
